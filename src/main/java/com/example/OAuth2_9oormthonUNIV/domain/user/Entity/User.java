@@ -8,6 +8,7 @@ import org.hibernate.Remove;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.security.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -24,6 +25,6 @@ public class User {
     private String email; //이메일
     private String name; //이름
 
-    @CreationTimestamp //INSERT 쿼리가 발생할 때, 현재 시간을 값으로 채워서 쿼리를 생성
-    private Timestamp timestamp; //가입일 기록
+    @CreationTimestamp
+    private LocalDateTime timestamp;
 }
