@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+/*
+ * OAuth2 로그인 사용자가 처음 로그인한 경우 DB에 저장하고,
+ * 이미 존재하는 경우에는 그대로 반환
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -39,7 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .build();
             return userRepository.save(newUser);
         });
-
+        // 인증 객체 반환
         return oAuth2User;
     }
 }

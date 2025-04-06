@@ -25,12 +25,16 @@ public class SecurityConfig {
     }
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtTokenProvider;
+
+    /**
+     * Spring Security 필터 설정
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.disable())
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // 🔧 세션 허용
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))// 세션을 사용하지 않음 (JWT 기반 인증)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/", "/loginForm", "/joinForm", "/register", "/login",
@@ -43,14 +47,15 @@ public class SecurityConfig {
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // ← 이게 꼭 있어야 함!
+                                .userService(customOAuth2UserService)
                         )
                         .defaultSuccessUrl("/loginSuccess", false)
                 );
-
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+        // JWT 인증 필터 등록
+        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), //
                 UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
