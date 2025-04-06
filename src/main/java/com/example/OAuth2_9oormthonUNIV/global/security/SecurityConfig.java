@@ -49,7 +49,7 @@ public class SecurityConfig {
                         )
                         .defaultSuccessUrl("/loginSuccess", false)
                 );
-        // 여기에서 JWT 필터 추가! UsernamePasswordAuthenticationFilter 전에!
+
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                 UsernamePasswordAuthenticationFilter.class);
         return http.build();

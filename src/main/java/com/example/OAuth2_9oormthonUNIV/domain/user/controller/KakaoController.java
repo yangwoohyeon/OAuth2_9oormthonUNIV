@@ -29,13 +29,13 @@ public class KakaoController {
                 : "no-email@kakao.com";
         String nickname = ((Map<?, ?>) oAuth2User.getAttribute("properties")).get("nickname").toString();
 
-        // 👉 JWT 토큰 생성
+        //JWT 토큰 생성
         String jwtToken = jwtUtil.generateToken(id);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         System.out.println("로그인한 사용자: " + auth.getName());
 
-        // 👉 토큰 + 사용자 정보 리턴
+        //토큰 + 사용자 정보 리턴
         return ResponseEntity.ok(Map.of(
                 "message", "로그인 성공!",
                 "id", id,
