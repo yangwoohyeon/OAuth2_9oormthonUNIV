@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.util.Map;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -40,8 +42,22 @@ public class UserController {
             return ResponseEntity.status(401).body("비밀번호 틀림");
         }
 
-        String token = jwtUtil.generateToken(userId);
-        return ResponseEntity.ok().body("Bearer " + token);
+        //Access + Refresh 토큰 생성
+        String accessToken = jwtUtil.generateToken(userId);
+        String refreshToken = jwtUtil.generateRefreshToken(userId);
+
+        //Refresh 토큰을 DB에 저장
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        // Access토큰과 Refresh토큰을 JSON으로 반환
+        return ResponseEntity.ok(Map.of(
+                "accessToken", accessToken,
+                "refreshToken", refreshToken
+        ));
     }
+
+
+
 
 }

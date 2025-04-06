@@ -23,6 +23,14 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateRefreshToken(String userId) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7일
+                .signWith(key)
+                .compact();
+    }
     // 토큰에서 userId 추출
     public String extractUserId(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build()

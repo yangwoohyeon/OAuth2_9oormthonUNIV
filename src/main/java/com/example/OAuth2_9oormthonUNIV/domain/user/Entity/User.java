@@ -25,6 +25,9 @@ public class User {
     private String email; //이메일
     private String name; //이름
 
+    @Column(length = 500)
+    private String refreshToken; //리프레시 토큰
+
     @CreationTimestamp
     private LocalDateTime timestamp;
 }
