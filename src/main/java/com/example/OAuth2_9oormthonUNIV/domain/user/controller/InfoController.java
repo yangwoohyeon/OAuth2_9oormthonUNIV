@@ -6,6 +6,7 @@ import com.example.OAuth2_9oormthonUNIV.domain.user.Repository.UserRepository;
 import com.example.OAuth2_9oormthonUNIV.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class InfoController {
 
     private final UserRepository userRepository;
-    private final UserService userService;
     private final JwtUtil jwtUtil;
 
     //JWT토큰으로 사용자 이름 불러오기
@@ -25,7 +25,8 @@ public class InfoController {
             return ResponseEntity.status(401).body("토큰 없음");
         }
 
-        String token = authHeader.trim();
+        // Bearer 제거
+        String token = authHeader.replace("Bearer ", "").trim();
 
         if (!jwtUtil.validateToken(token)) {
             return ResponseEntity.status(401).body("토큰 무효");
@@ -37,4 +38,6 @@ public class InfoController {
 
         return ResponseEntity.ok().body("로그인한 사용자의 이름: " + user.getName());
     }
+
+
 }

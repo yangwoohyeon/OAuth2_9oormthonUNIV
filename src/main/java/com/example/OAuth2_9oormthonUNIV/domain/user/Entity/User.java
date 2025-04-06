@@ -1,6 +1,7 @@
 package com.example.OAuth2_9oormthonUNIV.domain.user.Entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
 @RequiredArgsConstructor
 public class User {
 
