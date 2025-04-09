@@ -32,12 +32,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.disable())
-                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable()) // CORS 설정 비활성화 (필요 시 활성화 가능)
+                .csrf(csrf -> csrf.disable()) // CSRF 보안 비활성화 (JWT 기반이므로 불필요)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))// 세션을 사용하지 않음 (JWT 기반 인증)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/loginForm", "/joinForm", "/register", "/login",
+                                "/","/register", "/login",
                                 "/kakao/callback",
                                 "/user/name",
                                 "/images/**", "/css/**", "/js/**", "/webjars/**",
@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("/loginSuccess", false)
+                        .defaultSuccessUrl("/loginSuccess", false) //OAuth2 로그인 성공 시 /loginSuccess로 이동
                 );
         // JWT 인증 필터 등록
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), //

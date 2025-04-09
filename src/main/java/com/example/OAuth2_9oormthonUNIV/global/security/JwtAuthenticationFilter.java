@@ -32,8 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰이 유효하면 인증 객체 생성 후 SecurityContext에 설정
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = jwtTokenProvider.getAuthentication(token); //인증 객체 생성
+            SecurityContextHolder.getContext().setAuthentication(authentication); //인증 객체를 SecurityContextHolder에 등록
         }
 
         // 다음 필터로 요청 전달
