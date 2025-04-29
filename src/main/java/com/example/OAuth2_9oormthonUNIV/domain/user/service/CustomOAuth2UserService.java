@@ -25,6 +25,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
+        // 전체 attributes 출력
+        Map<String, Object> attribute = oAuth2User.getAttributes();
+        System.out.println("카카오 사용자 전체 정보: " + attribute);
+
         // 카카오에서 받은 사용자 정보 추출
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");

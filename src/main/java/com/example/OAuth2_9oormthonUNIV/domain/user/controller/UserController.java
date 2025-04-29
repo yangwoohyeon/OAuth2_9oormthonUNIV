@@ -10,10 +10,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Map;
 
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class UserController {
 
@@ -35,14 +37,14 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String userId, @RequestParam String password) {
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserId(userId)  //userId로 회원을 찾을 수 없으면 회원가입이 안된 사용자
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body("비밀번호 틀림");
         }
 
-        //Access + Refresh 토큰 생성
+        //로그인에 성공시 Access + Refresh 토큰 생성
         String accessToken = jwtUtil.generateToken(userId);
         String refreshToken = jwtUtil.generateRefreshToken(userId);
 
