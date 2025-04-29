@@ -51,9 +51,7 @@ public class KakaoController {
                 "id", id,
                 "email", email,
                 "nickname", nickname,
-                "jwtToken", jwtToken,
-                "refreshToken", refreshToken
-
+                "jwtToken", jwtToken
         ));
     }
 

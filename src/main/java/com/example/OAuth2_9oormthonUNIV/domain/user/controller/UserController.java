@@ -54,8 +54,7 @@ public class UserController {
 
         // Access토큰과 Refresh토큰을 JSON으로 반환
         return ResponseEntity.ok(Map.of(
-                "accessToken", accessToken,
-                "refreshToken", refreshToken
+                "accessToken", accessToken
         ));
     }
 
