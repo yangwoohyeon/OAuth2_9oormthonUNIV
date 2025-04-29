@@ -14,7 +14,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // 랜덤 키 생성
-    private final long expiration = 1000 * 60 * 60 * 24; // 24시간
+    private final long expiration = 1000 * 60 * 60; // 1시간
 
     // 토큰 생성
     public String generateToken(String userId) {
@@ -43,7 +43,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    // 토큰 유효성 검사
+    // 토큰 유효성 검사(만료되거나 잘못된 토큰이면 false 반환)
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -58,7 +58,7 @@ public class JwtUtil {
      */
     public String resolveToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
-        if (bearer != null && bearer.startsWith("Bearer ")) {
+        if (bearer != null && bearer.startsWith("Bearer ")) { //Bearer는 보안 토큰 이라는 뜻!
             return bearer.substring(7); // "Bearer " 제거
         }
         return null;
@@ -66,6 +66,7 @@ public class JwtUtil {
 
     /**
      * 토큰을 기반으로 Authentication 반환
+     * JWT 기반 인증을 구현할때 사용됨
      */
     public Authentication getAuthentication(String token) {
         String userId = extractUserId(token); // 토큰에서 userId 추출
