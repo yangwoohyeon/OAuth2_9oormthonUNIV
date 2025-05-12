@@ -1,6 +1,5 @@
 package com.example.OAuth2_9oormthonUNIV.global.websocket;
 
-
 import com.example.OAuth2_9oormthonUNIV.domain.chat.dto.ChatMessageDto;
 import com.example.OAuth2_9oormthonUNIV.domain.chat.entity.ChatMessage;
 import com.example.OAuth2_9oormthonUNIV.domain.chat.entity.ChatRoom;
@@ -53,6 +52,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 
         Long chatRoomId = chatMessageDto.getChatRoomId();
         String senderId = chatMessageDto.getSenderId();
+        String receiverId = chatMessageDto.getReceiverId();
 
         User sender = userRepository.findByUserId(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음: " + senderId));
@@ -70,9 +70,19 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
             s.sendMessage(new TextMessage(mapper.writeValueAsString(chatMessageDto)));
         }
 
+        ChatRoom chatRoom = null;
+
         if (chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.TALK)) {
-            ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                    .orElseThrow(() -> new IllegalArgumentException("채팅방 없음: " + chatRoomId));
+            chatRoom = chatRoomRepository.findByUsers(senderId, receiverId)
+                    .orElseGet(() -> {
+                        User receiver = userRepository.findByUserId(receiverId)
+                                .orElseThrow(() -> new IllegalArgumentException("상대방 없음: " + receiverId));
+
+                        ChatRoom newRoom = new ChatRoom();
+                        newRoom.setUserA(sender);
+                        newRoom.setUserB(receiver);
+                        return chatRoomRepository.save(newRoom);
+                    });
 
             ChatMessage saved = ChatMessage.builder()
                     .chatRoom(chatRoom)

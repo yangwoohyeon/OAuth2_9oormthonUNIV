@@ -7,6 +7,7 @@ import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,4 +21,5 @@ public class ChatRoom {
 
     @ManyToOne
     private User userB;
+
 }

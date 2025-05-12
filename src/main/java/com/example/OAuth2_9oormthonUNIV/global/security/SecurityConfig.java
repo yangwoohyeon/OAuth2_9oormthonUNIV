@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 "/user/name",
                                 "/images/**", "/css/**", "/js/**", "/webjars/**",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/loginSuccess"
+                                "/loginSuccess","/ws/**"
                         ).permitAll()
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .anyRequest().authenticated()
