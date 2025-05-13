@@ -6,6 +6,7 @@ import com.example.OAuth2_9oormthonUNIV.domain.chat.entity.ChatRoom;
 import com.example.OAuth2_9oormthonUNIV.domain.chat.repository.ChatMessageRepository;
 import com.example.OAuth2_9oormthonUNIV.domain.chat.repository.ChatRoomRepository;
 import com.example.OAuth2_9oormthonUNIV.domain.user.Entity.User;
+import com.example.OAuth2_9oormthonUNIV.domain.user.Jwt.JwtUtil;
 import com.example.OAuth2_9oormthonUNIV.domain.user.Repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
-
+    private final JwtUtil jwtUtil;
     private final Set<WebSocketSession> sessions = new HashSet<>();
     private final Map<Long, Set<WebSocketSession>> chatRoomSessionMap = new HashMap<>();
 
@@ -51,8 +52,15 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
         log.info("chatMessageDto: {}", chatMessageDto);
 
         Long chatRoomId = chatMessageDto.getChatRoomId();
-        String senderId = chatMessageDto.getSenderId();
         String receiverId = chatMessageDto.getReceiverId();
+
+        String token = (String) session.getAttributes().get("token");
+        if (!jwtUtil.validateToken(token)) {
+            session.sendMessage(new TextMessage("❌ 유효하지 않은 토큰입니다."));
+            return;
+        }
+
+        String senderId = jwtUtil.extractUserId(token);
 
         User sender = userRepository.findByUserId(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음: " + senderId));
@@ -62,18 +70,24 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
             chatMessageDto.setMessage(sender.getName() + "님이 입장하셨습니다.");
         } else if (chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.LEAVE)) {
             Set<WebSocketSession> roomSessions = chatRoomSessionMap.get(chatRoomId);
-            if (roomSessions != null) roomSessions.remove(session);
-            chatMessageDto.setMessage(sender.getName() + "님이 퇴장하셨습니다.");
+            if (roomSessions != null) {
+                roomSessions.remove(session);
+                chatMessageDto.setMessage(sender.getName() + "님이 퇴장하셨습니다.");
+
+                for (WebSocketSession s : roomSessions) {
+                    s.sendMessage(new TextMessage(mapper.writeValueAsString(chatMessageDto)));
+                }
+            }
+            return;
         }
 
+        // 👥 채팅방 유저 정보 저장 및 메시지 브로드캐스트
         for (WebSocketSession s : chatRoomSessionMap.getOrDefault(chatRoomId, new HashSet<>())) {
             s.sendMessage(new TextMessage(mapper.writeValueAsString(chatMessageDto)));
         }
 
-        ChatRoom chatRoom = null;
-
         if (chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.TALK)) {
-            chatRoom = chatRoomRepository.findByUsers(senderId, receiverId)
+            ChatRoom chatRoom = chatRoomRepository.findByUsers(sender.getUserId(), receiverId)
                     .orElseGet(() -> {
                         User receiver = userRepository.findByUserId(receiverId)
                                 .orElseThrow(() -> new IllegalArgumentException("상대방 없음: " + receiverId));
@@ -94,6 +108,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
             chatMessageRepository.save(saved);
         }
     }
+
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket 채팅 테스트</title>
+</head>
+<body>
+<h2>채팅 테스트</h2>
+<div>
+    <label>Access Token: <input type="text" id="token" /></label><br>
+    <label>보내는 사람 ID: <input type="text" id="senderId" /></label><br>
+    <label>받는 사람 ID: <input type="text" id="receiverId" /></label><br>
+    <label>채팅방 ID: <input type="number" id="chatRoomId" /></label><br>
+    <label>메시지 내용: <input type="text" id="message" /></label><br>
+    <button onclick="connectWebSocket()">WebSocket 연결</button>
+    <button onclick="sendJoin()">JOIN</button>
+    <button onclick="sendMessage()">TALK</button>
+    <button onclick="sendLeave()">LEAVE</button>
+</div>
+
+<h3>채팅 로그</h3>
+<pre id="chatLog" style="background:#eee; padding:10px; height:300px; overflow-y:scroll;"></pre>
+
+<script>
+    let socket;
+
+    function connectWebSocket() {
+        const token = document.getElementById("token").value;
+        const socketUrl = "ws://localhost:8080/ws/conn?token=" + encodeURIComponent(token);
+        socket = new WebSocket(socketUrl); // ✅ query 파라미터 방식
+
+
+        socket.onopen = () => log("✅ WebSocket 연결됨");
+        socket.onmessage = (event) => log("📩 " + event.data);
+        socket.onclose = () => log("❌ 연결 종료됨");
+        socket.onerror = (e) => log("⚠️ 에러 발생: " + e);
+    }
+
+
+
+
+    function sendJoin() {
+        const msg = createMessage("JOIN");
+        socket.send(JSON.stringify(msg));
+    }
+
+    function sendMessage() {
+        const msg = createMessage("TALK");
+        socket.send(JSON.stringify(msg));
+    }
+
+    function sendLeave() {
+        const msg = createMessage("LEAVE");
+        socket.send(JSON.stringify(msg));
+    }
+
+    function createMessage(type) {
+        return {
+            messageType: type,
+            chatRoomId: parseInt(document.getElementById("chatRoomId").value),
+            senderId: document.getElementById("senderId").value,
+            receiverId: document.getElementById("receiverId").value,
+            message: document.getElementById("message").value
+        };
+    }
+
+    function log(message) {
+        const logArea = document.getElementById("chatLog");
+        logArea.textContent += message + "\n";
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+</script>
+</body>
+</html>
